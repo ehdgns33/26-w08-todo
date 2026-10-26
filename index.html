@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f8fafc">
-    <title>오늘의 할 일</title>
+    <title>전체 일정 관리</title>
     <script>
       tailwind = {
         config: {
@@ -53,12 +53,27 @@
             <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-indigo-700">나만의 하루 정리</p>
             <div class="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h1 class="text-2xl font-bold tracking-tight sm:text-3xl" id="app-title">오늘의 할 일</h1>
-                <p class="mt-1 text-sm text-slate-500">하나씩 완료하며 오늘을 채워보세요.</p>
+                <h1 class="text-2xl font-bold tracking-tight sm:text-3xl" id="app-title">전체 일정</h1>
+                <p class="mt-1 text-sm text-slate-500">날짜별 일정을 정리하고 진행 상황을 확인해 보세요.</p>
               </div>
               <p class="rounded-full bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700" id="remaining-count" aria-live="polite">남은 할 일 0개</p>
             </div>
           </header>
+
+          <section class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="일정 요약">
+            <article class="rounded-xl bg-slate-50 p-4">
+              <p class="text-sm font-medium text-slate-500">전체 일정</p>
+              <p class="mt-1 text-2xl font-bold text-slate-800" id="total-count">0</p>
+            </article>
+            <article class="rounded-xl bg-emerald-50 p-4">
+              <p class="text-sm font-medium text-emerald-700">완료</p>
+              <p class="mt-1 text-2xl font-bold text-emerald-700" id="completed-count">0</p>
+            </article>
+            <article class="rounded-xl bg-indigo-50 p-4">
+              <p class="text-sm font-medium text-indigo-700">진행 중</p>
+              <p class="mt-1 text-2xl font-bold text-indigo-700" id="active-count">0</p>
+            </article>
+          </section>
 
           <section class="mb-6" aria-label="전체 진행률">
             <div class="mb-2 flex items-center justify-between">
@@ -72,10 +87,16 @@
 
           <div class="mb-4 hidden rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-700" id="app-message" role="alert"></div>
 
-          <form class="mb-7 flex gap-2" id="todo-form" novalidate>
-            <label class="sr-only" for="todo-input">새 할 일</label>
-            <input class="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20" id="todo-input" name="todo" type="text" placeholder="새로운 할 일을 입력하세요" autocomplete="off">
-            <button class="shrink-0 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" type="submit">추가</button>
+          <form class="todo-form mb-7" id="todo-form" novalidate>
+            <div class="flex gap-2">
+              <label class="sr-only" for="todo-input">새 할 일</label>
+              <input class="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20" id="todo-input" name="todo" type="text" placeholder="새로운 할 일을 입력하세요" autocomplete="off">
+              <button class="shrink-0 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" type="submit">추가</button>
+            </div>
+            <label class="due-date-control" for="todo-date">
+              <span>일정 날짜</span>
+              <input id="todo-date" name="dueDate" type="date">
+            </label>
           </form>
 
           <section aria-label="할 일 목록">
@@ -94,5 +115,17 @@
       </section>
       <p class="mt-5 text-center text-sm text-slate-500">작은 한 걸음이 멋진 하루를 만듭니다.</p>
     </main>
+
+    <dialog class="delete-dialog" id="delete-dialog" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description">
+      <div class="delete-dialog-content">
+        <div class="delete-dialog-emoji" aria-hidden="true">😱</div>
+        <h2 class="text-xl font-bold text-slate-800" id="delete-dialog-title">정말 삭제할까요?</h2>
+        <p class="mt-2 text-sm text-slate-600" id="delete-dialog-description">삭제한 일정은 다시 되돌릴 수 없어요.</p>
+        <div class="mt-6 flex justify-center gap-3">
+          <button class="rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" type="button" id="cancel-delete">취소</button>
+          <button class="rounded-xl bg-rose-600 px-4 py-2 font-semibold text-white transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2" type="button" id="confirm-delete">삭제할게요</button>
+        </div>
+      </div>
+    </dialog>
   </body>
 </html>

@@ -11,11 +11,147 @@
   scrollbar-gutter: stable;
 }
 
+.todo-form {
+  display: grid;
+  gap: 12px;
+}
+
+.due-date-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #475569;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.due-date-control input {
+  min-height: 42px;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  color: #334155;
+  font: inherit;
+}
+
+.due-date-control input:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.task-date {
+  display: inline-block;
+  margin-top: 0.35rem;
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+.task-date-overdue {
+  color: #be123c;
+  font-weight: 700;
+}
+
+.todo-edit-fields {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 8px;
+}
+
+.todo-edit-date {
+  width: fit-content;
+  min-height: 40px;
+  max-width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  color: #334155;
+}
+
+#clear-completed:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.todo-item {
+  position: relative;
+}
+
+.delete-dialog {
+  width: min(26rem, calc(100% - 2rem));
+  max-width: none;
+  border: 0;
+  border-radius: 1.25rem;
+  padding: 0;
+  box-shadow: 0 24px 64px rgb(15 23 42 / 24%);
+}
+
+.delete-dialog::backdrop {
+  background: rgb(15 23 42 / 50%);
+  backdrop-filter: blur(3px);
+}
+
+.delete-dialog-content {
+  padding: 2rem;
+  text-align: center;
+}
+
+.delete-dialog-emoji {
+  margin-bottom: 0.75rem;
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.fireworks {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.firework-burst {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.firework-particle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--particle-color);
+  animation: firework-pop 700ms ease-out var(--delay) both;
+}
+
+@keyframes firework-pop {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.35);
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .fireworks {
+    display: none;
   }
 }

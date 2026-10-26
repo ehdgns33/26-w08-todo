@@ -4,11 +4,13 @@
   const state = {
     todos: [],
     filter: "all",
-    editingId: null
+    editingId: null,
+    pendingDelete: null
   };
 
   const form = document.querySelector("#todo-form");
   const input = document.querySelector("#todo-input");
+  const dateInput = document.querySelector("#todo-date");
   const list = document.querySelector("#todo-list");
   const filterControls = document.querySelector("#filter-controls");
   const clearCompletedButton = document.querySelector("#clear-completed");
@@ -16,7 +18,32 @@
   const progressFill = document.querySelector("#progress-fill");
   const progressLabel = document.querySelector("#progress-label");
   const remainingCount = document.querySelector("#remaining-count");
+  const totalCount = document.querySelector("#total-count");
+  const completedCountLabel = document.querySelector("#completed-count");
+  const activeCountLabel = document.querySelector("#active-count");
   const appMessage = document.querySelector("#app-message");
+  const deleteDialog = document.querySelector("#delete-dialog");
+  const deleteDialogDescription = document.querySelector("#delete-dialog-description");
+  const cancelDeleteButton = document.querySelector("#cancel-delete");
+  const confirmDeleteButton = document.querySelector("#confirm-delete");
+
+  function getLocalDateString(timestamp = Date.now()) {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function isValidDateString(value) {
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const [year, month, day] = value.split("-").map(Number);
+    const date = new Date(0);
+    date.setFullYear(year, month - 1, day);
+    return date.getFullYear() === year
+      && date.getMonth() === month - 1
+      && date.getDate() === day;
+  }
 
   function showMessage(message) {
     appMessage.textContent = message;
@@ -36,7 +63,8 @@
       && todo.text.trim().length > 0
       && typeof todo.completed === "boolean"
       && typeof todo.createdAt === "number"
-      && Number.isFinite(todo.createdAt);
+      && Number.isFinite(todo.createdAt)
+      && (todo.dueDate === undefined || isValidDateString(todo.dueDate));
   }
 
   function loadState() {
@@ -99,7 +127,7 @@
 
   function createTodoItem(todo) {
     const item = document.createElement("li");
-    item.className = "flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:p-4";
+    item.className = "todo-item flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:p-4";
     item.dataset.id = todo.id;
 
     const checkbox = document.createElement("input");
@@ -111,13 +139,24 @@
     item.append(checkbox);
 
     if (state.editingId === todo.id) {
+      const editFields = document.createElement("div");
+      editFields.className = "todo-edit-fields";
+
       const editInput = document.createElement("input");
       editInput.type = "text";
-      editInput.className = "min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20";
+      editInput.className = "min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20";
       editInput.dataset.role = "edit-input";
       editInput.value = todo.text;
       editInput.setAttribute("aria-label", "할 일 내용 수정");
-      item.append(editInput);
+
+      const editDateInput = document.createElement("input");
+      editDateInput.type = "date";
+      editDateInput.className = "todo-edit-date";
+      editDateInput.dataset.role = "edit-date";
+      editDateInput.value = todo.dueDate ?? getLocalDateString(todo.createdAt);
+      editDateInput.setAttribute("aria-label", "일정 날짜 수정");
+      editFields.append(editInput, editDateInput);
+      item.append(editFields);
 
       const actions = document.createElement("div");
       actions.className = "flex shrink-0 gap-2";
@@ -129,10 +168,25 @@
       return item;
     }
 
+    const content = document.createElement("div");
+    content.className = "min-w-0 flex-1";
     const text = document.createElement("span");
-    text.className = `todo-text min-w-0 flex-1 pt-1 ${todo.completed ? "text-slate-400 line-through" : "text-slate-700"}`;
+    text.className = `todo-text block pt-1 ${todo.completed ? "text-slate-400 line-through" : "text-slate-700"}`;
     text.textContent = todo.text;
-    item.append(text);
+    content.append(text);
+
+    const dueDate = todo.dueDate ?? getLocalDateString(todo.createdAt);
+    const dateLabel = document.createElement("time");
+    dateLabel.className = `task-date ${!todo.completed && dueDate < getLocalDateString() ? "task-date-overdue" : ""}`;
+    dateLabel.dateTime = dueDate;
+    dateLabel.textContent = new Intl.DateTimeFormat("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "short"
+    }).format(new Date(`${dueDate}T00:00:00`));
+    content.append(dateLabel);
+    item.append(content);
 
     const actions = document.createElement("div");
     actions.className = "flex shrink-0 gap-2";
@@ -153,6 +207,10 @@
       : Math.round((completedCount / state.todos.length) * 100);
 
     remainingCount.textContent = `남은 할 일 ${remaining}개`;
+    totalCount.textContent = String(state.todos.length);
+    completedCountLabel.textContent = String(completedCount);
+    activeCountLabel.textContent = String(remaining);
+    clearCompletedButton.disabled = completedCount === 0;
     progressLabel.textContent = `${percentage}%`;
     progressFill.style.width = `${percentage}%`;
     progressBar.setAttribute("aria-valuenow", String(percentage));
@@ -199,6 +257,48 @@
     editInput.select();
   }
 
+  function showFireworks() {
+    const fireworks = document.createElement("span");
+    fireworks.className = "fireworks";
+    fireworks.setAttribute("aria-hidden", "true");
+
+    [25, 50, 75].forEach((position) => {
+      const burst = document.createElement("span");
+      burst.className = "firework-burst";
+      burst.style.left = `${position}%`;
+      burst.style.top = "50%";
+
+      for (let index = 0; index < 12; index += 1) {
+        const particle = document.createElement("span");
+        const angle = (Math.PI * 2 * index) / 12;
+        const distance = 24 + Math.random() * 22;
+        particle.className = "firework-particle";
+        particle.style.setProperty("--x", `${Math.cos(angle) * distance}px`);
+        particle.style.setProperty("--y", `${Math.sin(angle) * distance}px`);
+        particle.style.setProperty("--delay", `${Math.random() * 100}ms`);
+        particle.style.setProperty("--particle-color", ["#f97316", "#eab308", "#ec4899", "#6366f1"][index % 4]);
+        burst.append(particle);
+      }
+      fireworks.append(burst);
+    });
+
+    document.body.append(fireworks);
+    window.setTimeout(() => fireworks.remove(), 900);
+  }
+
+  function openDeleteDialog(pendingDelete) {
+    state.pendingDelete = pendingDelete;
+    if (pendingDelete.type === "todo") {
+      const todo = state.todos.find((candidate) => candidate.id === pendingDelete.id);
+      deleteDialogDescription.textContent = `“${todo.text}” 일정을 삭제할까요? 삭제한 일정은 다시 되돌릴 수 없어요.`;
+    } else {
+      const completedCount = state.todos.filter((todo) => todo.completed).length;
+      deleteDialogDescription.textContent = `완료된 일정 ${completedCount}개를 모두 삭제할까요? 삭제한 일정은 다시 되돌릴 수 없어요.`;
+    }
+    deleteDialog.showModal();
+    cancelDeleteButton.focus();
+  }
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const text = input.value.trim();
@@ -209,13 +309,16 @@
     }
 
     clearMessage();
+    const dueDate = dateInput.value || getLocalDateString();
     state.todos.push({
       id: createId(),
       text,
       completed: false,
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      dueDate
     });
     input.value = "";
+    dateInput.value = getLocalDateString();
     state.filter = "all";
     refresh();
     input.focus();
@@ -237,6 +340,7 @@
     if (!todo) return;
     todo.completed = checkbox.checked;
     refresh();
+    if (todo.completed) showFireworks();
   });
 
   list.addEventListener("click", (event) => {
@@ -261,9 +365,7 @@
     }
 
     if (button.dataset.action === "delete") {
-      state.todos = state.todos.filter((candidate) => candidate.id !== todo.id);
-      state.editingId = null;
-      refresh();
+      openDeleteDialog({ type: "todo", id: todo.id });
       return;
     }
 
@@ -276,6 +378,7 @@
         return;
       }
       todo.text = text;
+      todo.dueDate = item.querySelector('[data-role="edit-date"]').value || getLocalDateString(todo.createdAt);
       state.editingId = null;
       refresh();
     }
@@ -294,11 +397,31 @@
   });
 
   clearCompletedButton.addEventListener("click", () => {
-    state.todos = state.todos.filter((todo) => !todo.completed);
+    openDeleteDialog({ type: "completed" });
+  });
+
+  cancelDeleteButton.addEventListener("click", () => {
+    deleteDialog.close();
+  });
+
+  confirmDeleteButton.addEventListener("click", () => {
+    if (!state.pendingDelete) return;
+    if (state.pendingDelete.type === "todo") {
+      state.todos = state.todos.filter((todo) => todo.id !== state.pendingDelete.id);
+    } else {
+      state.todos = state.todos.filter((todo) => !todo.completed);
+    }
     state.editingId = null;
+    state.pendingDelete = null;
+    deleteDialog.close();
     refresh();
   });
 
+  deleteDialog.addEventListener("close", () => {
+    state.pendingDelete = null;
+  });
+
+  dateInput.value = getLocalDateString();
   loadState();
   render();
 })();
