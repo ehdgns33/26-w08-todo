@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f7fb">
+    <title>오늘의 할 일</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    >
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <main class="container app-shell py-4 py-md-5">
+      <section class="todo-card card border-0 shadow-sm mx-auto" aria-labelledby="app-title">
+        <div class="card-body p-4 p-md-5">
+          <header class="mb-4">
+            <p class="eyebrow mb-2">나만의 하루 정리</p>
+            <div class="d-flex flex-wrap align-items-end justify-content-between gap-3">
+              <div>
+                <h1 class="h2 fw-bold mb-1" id="app-title">오늘의 할 일</h1>
+                <p class="text-secondary mb-0">하나씩 완료하며 오늘을 채워보세요.</p>
+              </div>
+              <p class="remaining-count mb-0" id="remaining-count" aria-live="polite">남은 할 일 0개</p>
+            </div>
+          </header>
+
+          <section class="progress-section mb-4" aria-label="전체 진행률">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="small fw-semibold text-secondary">진행률</span>
+              <span class="small fw-bold" id="progress-label">0%</span>
+            </div>
+            <div
+              class="progress"
+              role="progressbar"
+              aria-label="할 일 진행률"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              id="progress-bar"
+            >
+              <div class="progress-bar" id="progress-fill" style="width: 0%"></div>
+            </div>
+          </section>
+
+          <div class="alert alert-warning d-none py-2 px-3 small" id="app-message" role="alert"></div>
+
+          <form class="input-group todo-entry mb-4" id="todo-form" novalidate>
+            <label class="visually-hidden" for="todo-input">새 할 일</label>
+            <input
+              class="form-control"
+              id="todo-input"
+              name="todo"
+              type="text"
+              placeholder="새로운 할 일을 입력하세요"
+              autocomplete="off"
+            >
+            <button class="btn btn-primary px-4" type="submit">추가</button>
+          </form>
+
+          <section aria-label="할 일 목록">
+            <div class="list-controls d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+              <div class="btn-group filter-group" role="group" aria-label="할 일 필터" id="filter-controls">
+                <button class="btn btn-sm btn-outline-secondary active" type="button" data-filter="all" aria-pressed="true">전체</button>
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-filter="active" aria-pressed="false">진행 중</button>
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-filter="completed" aria-pressed="false">완료됨</button>
+              </div>
+              <button class="btn btn-sm btn-link link-danger text-decoration-none px-0" type="button" id="clear-completed">
+                완료된 항목 모두 삭제
+              </button>
+            </div>
+
+            <ul class="todo-list list-group" id="todo-list" aria-live="polite" aria-relevant="additions removals text"></ul>
+          </section>
+        </div>
+      </section>
+      <p class="text-center text-secondary small mt-4 mb-0">작은 한 걸음이 멋진 하루를 만듭니다.</p>
+    </main>
+  </body>
+</html>
