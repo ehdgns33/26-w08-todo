@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8fafc">
+    <title>오늘의 할 일</title>
+    <script>
+      tailwind = {
+        config: {
+          safelist: [
+            "hidden", "block", "flex", "inline-flex", "flex-1", "flex-wrap",
+            "flex-grow", "flex-shrink-0", "items-center", "items-start",
+            "justify-between", "justify-center", "gap-1", "gap-2", "gap-3",
+            "gap-4", "min-w-0", "w-full", "h-2", "max-w-3xl", "max-h-[52vh]",
+            "overflow-y-auto", "rounded-xl", "rounded-2xl", "rounded-full",
+            "border", "border-slate-200", "border-slate-300",
+            "border-indigo-600", "border-emerald-600", "border-rose-300",
+            "bg-white", "bg-slate-50", "bg-slate-100", "bg-indigo-600",
+            "bg-indigo-700", "bg-indigo-50", "bg-emerald-50", "bg-rose-50",
+            "text-xs", "text-sm", "text-base", "text-lg", "font-medium",
+            "font-semibold", "font-bold", "text-slate-400", "text-slate-500",
+            "text-slate-600", "text-slate-700", "text-slate-800", "text-white",
+            "text-indigo-700", "text-emerald-700", "text-rose-700",
+            "line-through", "break-words", "whitespace-pre-wrap", "shadow-sm",
+            "transition", "hover:bg-slate-50", "hover:bg-indigo-700",
+            "hover:bg-rose-50", "hover:text-rose-800", "focus:outline-none",
+            "focus:ring-2", "focus:ring-indigo-500", "focus:ring-offset-2",
+            "disabled:cursor-not-allowed", "disabled:opacity-50",
+            "sm:flex-nowrap", "sm:w-auto", "sm:flex-1", "mt-1", "h-5", "w-5",
+            "cursor-pointer", "accent-indigo-600", "min-h-11", "rounded-lg",
+            "px-3", "py-2", "px-4", "py-8", "p-3", "p-4", "sm:p-4",
+            "text-center", "border-dashed", "outline-none",
+            "focus:border-indigo-600", "focus:ring-indigo-500/20",
+            "bg-emerald-100", "border-emerald-600", "text-slate-400",
+            "text-slate-700", "text-emerald-700", "text-rose-700",
+            "hover:bg-emerald-100", "hover:bg-indigo-50",
+            "hover:bg-slate-100", "flex-none", "space-y-2",
+            "duration-200", "transition-[width]"
+          ]
+        }
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body class="min-h-screen bg-slate-50 px-4 py-8 text-slate-800 sm:py-12">
+    <main class="mx-auto w-full max-w-3xl">
+      <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" aria-labelledby="app-title">
+        <div class="p-5 sm:p-8">
+          <header class="mb-7">
+            <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-indigo-700">나만의 하루 정리</p>
+            <div class="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h1 class="text-2xl font-bold tracking-tight sm:text-3xl" id="app-title">오늘의 할 일</h1>
+                <p class="mt-1 text-sm text-slate-500">하나씩 완료하며 오늘을 채워보세요.</p>
+              </div>
+              <p class="rounded-full bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700" id="remaining-count" aria-live="polite">남은 할 일 0개</p>
+            </div>
+          </header>
+
+          <section class="mb-6" aria-label="전체 진행률">
+            <div class="mb-2 flex items-center justify-between">
+              <span class="text-sm font-medium text-slate-600">진행률</span>
+              <span class="text-sm font-bold text-indigo-700" id="progress-label">0%</span>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-label="할 일 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
+              <div class="h-full rounded-full bg-indigo-600 transition-[width] duration-200" id="progress-fill" style="width: 0%"></div>
+            </div>
+          </section>
+
+          <div class="mb-4 hidden rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-700" id="app-message" role="alert"></div>
+
+          <form class="mb-7 flex gap-2" id="todo-form" novalidate>
+            <label class="sr-only" for="todo-input">새 할 일</label>
+            <input class="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20" id="todo-input" name="todo" type="text" placeholder="새로운 할 일을 입력하세요" autocomplete="off">
+            <button class="shrink-0 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" type="submit">추가</button>
+          </form>
+
+          <section aria-label="할 일 목록">
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex w-full rounded-xl bg-slate-100 p-1 sm:w-auto" role="group" aria-label="할 일 필터" id="filter-controls">
+                <button class="filter-button flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition sm:flex-none" type="button" data-filter="all" aria-pressed="true">전체</button>
+                <button class="filter-button flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition sm:flex-none" type="button" data-filter="active" aria-pressed="false">진행 중</button>
+                <button class="filter-button flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition sm:flex-none" type="button" data-filter="completed" aria-pressed="false">완료됨</button>
+              </div>
+              <button class="rounded-lg px-2 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50 hover:text-rose-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" type="button" id="clear-completed">완료된 항목 모두 삭제</button>
+            </div>
+
+            <ul class="max-h-[52vh] space-y-2 overflow-y-auto" id="todo-list" aria-live="polite" aria-relevant="additions removals text"></ul>
+          </section>
+        </div>
+      </section>
+      <p class="mt-5 text-center text-sm text-slate-500">작은 한 걸음이 멋진 하루를 만듭니다.</p>
+    </main>
+  </body>
+</html>
